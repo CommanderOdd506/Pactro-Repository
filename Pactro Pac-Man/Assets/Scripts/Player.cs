@@ -33,12 +33,12 @@ public class Player : MonoBehaviour
         ChangePosition(direction);
     }
 
-    Node CanMove (Vector2 d)
+    Node CanMove(Vector2 d)
     {
         Node moveToNode = null;
         for (int i = 0; i < currentNode.neighbors.Length; i++)
         {
-            if(currentNode.validDirections[i] == d)
+            if (currentNode.validDirections[i] == d)
             {
                 moveToNode = currentNode.neighbors[i];
                 break;
@@ -46,6 +46,28 @@ public class Player : MonoBehaviour
         }
 
         return moveToNode;
+    }
+
+    void ConsumePellet()
+    {
+        GameObject o = GetTileAtPosition(transform.position);
+        if (o != null)
+        {
+            Tile tile = o.GetComponent<Tile>();
+
+            if (tile != null)
+            {
+                if (!tile.didConsume && (tile.isPellet || tile.isSuperPellet))
+                {
+                    o.GetComponent<SpriteRenderer>().enabled = false;
+                    tile.didConsume = true;
+                    if (tile.isPellet)
+                    {
+                        GameObject.Find("Game").GetComponent<GameBoard>().AddOneScore();
+                    }
+                }
+            }
+        }
     }
 
     private void CheckInput()
@@ -75,21 +97,22 @@ public class Player : MonoBehaviour
 
         Move();
 
+        ConsumePellet();
         //Rotate();
     }
 
     void ChangePosition(Vector2 d)
     {
-        if(d != direction)
+        if (d != direction)
         {
             nextDirection = d;
         }
 
-        if(currentNode != null)
+        if (currentNode != null)
         {
             Node moveToNode = CanMove(d);
 
-            if(moveToNode != null)
+            if (moveToNode != null)
             {
                 direction = d;
                 targetNode = moveToNode;
@@ -99,23 +122,33 @@ public class Player : MonoBehaviour
         }
     }
 
+    GameObject GetTileAtPosition(Vector2 pos)
+    {
+        int x = Mathf.RoundToInt(pos.x);
+        int y = Mathf.RoundToInt(pos.y);
+
+        GameObject tile = GameObject.Find("Game").GetComponent<GameBoard>().tiles[x, y];
+
+        return tile;
+    }
+
     private void Move()
     {
-        if(targetNode != currentNode && targetNode != null)
+        if (targetNode != currentNode && targetNode != null)
         {
-            if(OverShotTarget())
+            if (OverShotTarget())
             {
                 currentNode = targetNode;
                 transform.localPosition = currentNode.transform.position;
 
                 Node moveToNode = CanMove(nextDirection);
 
-                if(moveToNode != null)
+                if (moveToNode != null)
                 {
                     direction = nextDirection;
                 }
 
-                if(moveToNode == null)
+                if (moveToNode == null)
                 {
                     moveToNode = CanMove(direction);
                 }
@@ -125,23 +158,25 @@ public class Player : MonoBehaviour
                     targetNode = moveToNode;
                     previousNode = currentNode;
                     currentNode = null;
-                } else
+                }
+                else
                 {
                     direction = Vector2.zero;
                 }
-            } else
+            }
+            else
             {
                 transform.localPosition += (Vector3)(direction * speed) * Time.deltaTime;
             }
         }
-        
+
     }
 
     void MoveToNode(Vector2 d)
     {
         Node moveToNode = CanMove(d);
 
-        if(moveToNode != null)
+        if (moveToNode != null)
         {
             transform.localPosition = moveToNode.transform.position;
             currentNode = moveToNode;
@@ -184,7 +219,7 @@ public class Player : MonoBehaviour
         return null;
     }
 
-    bool OverShotTarget ()
+    bool OverShotTarget()
     {
         float nodeToTarget = LengthFromPreviousNode(targetNode.transform.position);
         float nodeToSelf = LengthFromPreviousNode(transform.localPosition);
@@ -192,7 +227,7 @@ public class Player : MonoBehaviour
         return nodeToSelf > nodeToTarget;
     }
 
-    float LengthFromPreviousNode (Vector2 targetPosition)
+    float LengthFromPreviousNode(Vector2 targetPosition)
     {
         Vector2 length = targetPosition - (Vector2)previousNode.transform.position;
         return length.sqrMagnitude;
