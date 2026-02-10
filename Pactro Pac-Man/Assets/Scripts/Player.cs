@@ -10,7 +10,11 @@ public class Player : MonoBehaviour
     private Vector2 direction = Vector2.zero;
     private Vector2 nextDirection;
     private Animator animator;
+    public Animator goldAnimator;
+    public GameObject goldKnight;
+    public GameObject knight;
 
+    
     private float startingScale;
 
     private Node currentNode, previousNode, targetNode;
@@ -50,6 +54,18 @@ public class Player : MonoBehaviour
         return moveToNode;
     }
 
+    public void ActivateGoldKnightro()
+    {
+        knight.SetActive(false);
+        goldKnight.SetActive(true);
+    }
+
+    public void DeactivateGoldKnightro()
+    {
+        knight.SetActive(true);
+        goldKnight.SetActive(false);
+    }
+
     void ConsumePellet()
     {
         GameObject o = GetTileAtPosition(transform.position);
@@ -73,6 +89,7 @@ public class Player : MonoBehaviour
                         foreach (GameObject go in ghosts)
                         {
                             go.GetComponent<Ghost>().StartFrightenedMode();
+                            ActivateGoldKnightro();
                         }
                     }
 
@@ -199,21 +216,26 @@ public class Player : MonoBehaviour
     private void Animate()
     {
         animator.SetInteger("State", 0);
-        if(direction == Vector2.left)
+        goldAnimator.SetInteger("State", 0);
+        if (direction == Vector2.left)
         {
             animator.SetInteger("State", 4);
+            goldAnimator.SetInteger("State", 4);
         }
         else if (direction == Vector2.right)
         {
             animator.SetInteger("State", 2);
+            goldAnimator.SetInteger("State", 2);
         }
         else if(direction == Vector2.up)
         {
             animator.SetInteger("State", 1);
+            goldAnimator.SetInteger("State", 1);
         }
         else if(direction == Vector2.down)
         {
             animator.SetInteger("State", 3);
+            goldAnimator.SetInteger("State", 3);
         }
     }
 
