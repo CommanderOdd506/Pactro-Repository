@@ -52,6 +52,7 @@ public class Ghost : MonoBehaviour
             if (currentMode != Mode.Frightened)
             {
                 Debug.Log("Player Died");
+                player.GetComponent<Player>().Died();
                 PauseMenu.instance.LoseGame();
             }
            
@@ -180,6 +181,7 @@ public class Ghost : MonoBehaviour
             {
                 frightenedModeTimer = 0;
                 ChangeMode(previousMode);
+                player.GetComponent<Player>().DeactivateGoldKnightro();
             }
         }
     }

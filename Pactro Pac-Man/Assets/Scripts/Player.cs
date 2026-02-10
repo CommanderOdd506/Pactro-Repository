@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     private Animator animator;
     public Animator goldAnimator;
     public GameObject goldKnight;
+    public GameObject deadKnight;
     public GameObject knight;
 
     
@@ -200,6 +201,16 @@ public class Player : MonoBehaviour
             }
         }
 
+    }
+
+    public void Died()
+    {
+        knight.SetActive(false);
+        deadKnight.SetActive(true);
+        if (direction == Vector2.left)
+        {
+            deadKnight.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        }
     }
 
     void MoveToNode(Vector2 d)
