@@ -181,7 +181,6 @@ public class Ghost : MonoBehaviour
             {
                 frightenedModeTimer = 0;
                 ChangeMode(previousMode);
-                player.GetComponent<Player>().DeactivateGoldKnightro();
             }
         }
     }
