@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class Player : MonoBehaviour
     public GameObject goldKnight;
     public GameObject deadKnight;
     public GameObject knight;
+    public TextMeshProUGUI invincibility;
+    public float invincibilityDuration = 6f;
+    private Coroutine invincibilityRoutine;
 
     
     private float startingScale;
@@ -67,7 +71,7 @@ public class Player : MonoBehaviour
         goldKnight.SetActive(false);
     }
 
-    void ConsumePellet()
+     void ConsumePellet()
     {
         GameObject o = GetTileAtPosition(transform.position);
         if (o != null)
@@ -91,10 +95,28 @@ public class Player : MonoBehaviour
                         {
                             go.GetComponent<Ghost>().StartFrightenedMode();
                             ActivateGoldKnightro();
+                            
                         }
                     }
+                    if (tile.isSuperPellet)
+                    {
+                        if (invincibilityRoutine != null)
+                            StopCoroutine(invincibilityRoutine);
 
-                    
+                        invincibilityRoutine = StartCoroutine(InvincibilityRoutine());
+                    }
+                    IEnumerator InvincibilityRoutine()
+                    {
+                        invincibility.gameObject.SetActive(true);
+                        invincibility.text = "INVINCIBILITY ACTIVE";
+
+                        ActivateGoldKnightro();
+
+                        yield return new WaitForSeconds(invincibilityDuration);
+                        invincibility.gameObject.SetActive(false);
+
+                        DeactivateGoldKnightro();
+                    }
                 }
             }
         }
