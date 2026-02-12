@@ -15,7 +15,18 @@ public class Player : MonoBehaviour
     public GameObject deadKnight;
     public GameObject knight;
 
-    
+    [Header("Power Mode")]
+    public float powerDuration = 10f;
+    public float flickerStartTime = 3f;
+    public float flickerInterval = 0.15f;
+
+    private float powerTimer = 0f;
+    private float flickerTimer = 0f;
+    private bool isPowered = false;
+    private bool isFlickering = false;
+
+    private SpriteRenderer knightRenderer;
+    private SpriteRenderer goldRenderer;
     private float startingScale;
 
     private Node currentNode, previousNode, targetNode;
@@ -23,6 +34,10 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        knightRenderer = knight.GetComponent<SpriteRenderer>();
+        goldRenderer = goldKnight.GetComponent<SpriteRenderer>();
+
+        goldRenderer.enabled = false; // start white
         Node node = GetNodeAtPosition(transform.localPosition);
 
         if (node != null)
@@ -57,14 +72,21 @@ public class Player : MonoBehaviour
 
     public void ActivateGoldKnightro()
     {
-        knight.SetActive(false);
-        goldKnight.SetActive(true);
-    }
+        powerTimer = powerDuration;
+        isPowered = true;
+        isFlickering = false;
+        flickerTimer = 0f;
 
+        knightRenderer.enabled = false;
+        goldRenderer.enabled = true;
+    }
     public void DeactivateGoldKnightro()
     {
-        knight.SetActive(true);
-        goldKnight.SetActive(false);
+        isPowered = false;
+        isFlickering = false;
+
+        knightRenderer.enabled = true;
+        goldRenderer.enabled = false;
     }
 
     void ConsumePellet()
@@ -99,7 +121,38 @@ public class Player : MonoBehaviour
             }
         }
     }
+    void UpdatePowerMode()
+    {
+        if (!isPowered)
+            return;
 
+        powerTimer -= Time.deltaTime;
+
+        if (powerTimer <= flickerStartTime && !isFlickering)
+        {
+            isFlickering = true;
+        }
+
+        if (isFlickering)
+        {
+            flickerTimer += Time.deltaTime;
+
+            if (flickerTimer >= flickerInterval)
+            {
+                flickerTimer = 0f;
+
+                bool goldVisible = goldRenderer.enabled;
+
+                goldRenderer.enabled = !goldVisible;
+                knightRenderer.enabled = goldVisible;
+            }
+        }
+
+        if (powerTimer <= 0f)
+        {
+            DeactivateGoldKnightro();
+        }
+    }
     private void CheckInput()
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
@@ -128,6 +181,8 @@ public class Player : MonoBehaviour
         Move();
 
         ConsumePellet();
+
+        UpdatePowerMode();
 
         Animate();
     }
